@@ -1,0 +1,46 @@
+{
+	"version": "2.0.0",
+	"tasks": [
+	  {
+		// 1. 编译程序,需要指定-gcflags=all="-N -l"禁用编译优化和內连
+		"type": "shell", // 可以使用通用shell类型,也可以使用go类型
+		"label": "go: build luago", // lable是任务唯一标识
+		"command": "go",
+		"args": [
+		  "build",
+		  "-o",
+		  "luago",
+		  "-gcflags=all=\"-N -l\"",
+		  "${workspaceFolder}/main.go"
+		],
+		"problemMatcher": ["$go"],
+		"group": "build",
+		"detail": "cd ${workspaceFolder}; go build luago"
+	  },
+	  {
+		// 3. 在远程服务器上运行dlv dap headlease server
+		"type": "shell",
+		"label": "run remote dlv headless server",
+		"command": "dlv --listen=:2345 --headless=true --api-version=2 exec ${workspaceFolder}/luago test.lua",
+		"dependsOn": ["go: build luago"], // 同样,需要先执行步骤2
+		"isBackground": true, // 因为dlv需要保持在后台运行
+		"problemMatcher": [
+		  {
+			"pattern": [
+			  {
+				"regexp": ".",
+				"file": 1,
+				"location": 2,
+				"message": 3
+			  }
+			],
+			"background": {
+			  "activeOnStart": true,
+			  "beginsPattern": ".",
+			  "endsPattern": "."
+			}
+		  }
+		] // 配置该problemMatcher十分重要,告诉vscode 前置任务已经执行完成,可以执行调试了
+	  }
+	],
+  }
