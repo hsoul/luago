@@ -15,11 +15,14 @@
             ]
         },
         {
-            "name": "just run",
+            "name": "run_luago",
             "type": "go",
             "request": "launch",
             "mode": "debug",
-            "program": "${file}",
+            "program": "${workspaceFolder}/main.go",
+            "args": [
+                "test.lua",
+            ]
         },
         {
             "name": "Remote Debug",

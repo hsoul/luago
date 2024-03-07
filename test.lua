@@ -1,4 +1,2 @@
---[[hello
-world--]]
-
-print("hello world")
+local a = '\x32'
+print(a)

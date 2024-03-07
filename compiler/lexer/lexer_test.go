@@ -1,6 +1,7 @@
 package lexer
 
 import (
+	"bytes"
 	"fmt"
 	"os"
 	"regexp"
@@ -48,13 +49,19 @@ func TestLexer(t *testing.T) {
 // var regIdentifier = regexp.MustCompile(`^[_\d\w]+`)
 // var regNumber = regexp.MustCompile(`^0[xX][0-9a-fA-F]*(\.[0-9a-fA-F]*)?([pP][+\-]?[0-9]+)?|^[0-9]*(\.[0-9]*)?([eE][+\-]?[0-9]+)?`)
 // var reShortStr = regexp.MustCompile(`(?s)(^'(\\\\|\\'|\\\n|\\z\s*|[^'\n])*')|(^"(\\\\|\\"|\\\n|\\z\s*|[^"\n])*")`)
-var regOpeningLongBracket = regexp.MustCompile(`^\[=*\[`)
+// var regOpeningLongBracket = regexp.MustCompile(`^\[=*\[`)
 
 // var regDecEscapeSeq = regexp.MustCompile(`^\\[0-9]{1,3}`)
-// var regHexEscapeSeq = regexp.MustCompile(`^\\x[0-9a-fA-F]{2}`)
+var regHexEscapeSeq = regexp.MustCompile(`\\x[0-9a-fA-F]{2}`) //
+
 // var regUnicodeEscapeSeq = regexp.MustCompile(`^\\u\{[0-9a-fA-F]+\}`)
 
 func TestRegexp(t *testing.T) {
-	str := "[["
-	fmt.Println(regOpeningLongBracket.MatchString(str))
+	fmt.Println(regHexEscapeSeq.MatchString("0x01"))
+	fmt.Println(regHexEscapeSeq.MatchString(`\x00`))
+	fmt.Println(regHexEscapeSeq.MatchString("\x0f"))
+
+	var buf bytes.Buffer
+	buf.WriteByte(byte(50))
+	fmt.Println(buf.String())
 }

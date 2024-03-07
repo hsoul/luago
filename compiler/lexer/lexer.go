@@ -11,12 +11,12 @@ import (
 var reNewLine = regexp.MustCompile("\r\n|\n\r|\n|\r")
 var reIdentifier = regexp.MustCompile(`^[_\d\w]+`)                                                                                // 正则表达式 ^[_\d\w]+ 匹配以以下字符开头的字符串
 var reNumber = regexp.MustCompile(`^0[xX][0-9a-fA-F]*(\.[0-9a-fA-F]*)?([pP][+\-]?[0-9]+)?|^[0-9]*(\.[0-9]*)?([eE][+\-]?[0-9]+)?`) // 十六进制浮点数（以 0x 或 0X 开头）;十进制浮点数（以数字开头，后面可能跟一个小数点和小数部分）; 十进制指数（以数字开头，后面可能跟一个 e 或 E 和一个指数部分）
-var reShortStr = regexp.MustCompile(`(?s)(^'(\\\\|\\'|\\\n|\\z\s*|[^'\n])*')|(^"(\\\\|\\"|\\\n|\\z\s*|[^"\n])*")`) // 匹配以 ' 或者 " 开头结尾的字符串
-var reOpeningLongBracket = regexp.MustCompile(`^\[=*\[`) // 创建一个正则表达式，该正则表达式匹配以一个或多个 [ 字符开头的字符串，后面跟着零个或多个 = 字符，再跟着一个 [ 字符。
+var reShortStr = regexp.MustCompile(`(?s)(^'(\\\\|\\'|\\\n|\\z\s*|[^'\n])*')|(^"(\\\\|\\"|\\\n|\\z\s*|[^"\n])*")`)                // 匹配以 ' 或者 " 开头结尾的字符串
+var reOpeningLongBracket = regexp.MustCompile(`^\[=*\[`)                                                                          // 创建一个正则表达式，该正则表达式匹配以一个或多个 [ 字符开头的字符串，后面跟着零个或多个 = 字符，再跟着一个 [ 字符。
 
-var reDecEscapeSeq = regexp.MustCompile(`^\\[0-9]{1,3}`) // 匹配以一个反斜杠 \ 开头，后面跟着一个或多个数字（0到9），数字的数量可以是1到3位。
-var reHexEscapeSeq = regexp.MustCompile(`^\\x[0-9a-fA-F]{2}`) // 匹配以 \x 开头，后面跟着两个十六进制数字的字符串。
-var reUnicodeEscapeSeq = regexp.MustCompile(`^\\u\{[0-9a-fA-F]+\}`)
+var reDecEscapeSeq = regexp.MustCompile(`^\\[0-9]{1,3}`)            // 匹配以一个反斜杠 \ 开头，后面跟着一个或多个数字（0到9），数字的数量可以是1到3位。
+var reHexEscapeSeq = regexp.MustCompile(`^\\x[0-9a-fA-F]{2}`)       // 匹配以 \x 开头，后面跟着两个十六进制数字的字符串。
+var reUnicodeEscapeSeq = regexp.MustCompile(`^\\u\{[0-9a-fA-F]+\}`) // 匹配以 \x 开头，后面跟着两位十六进制数字（0-9 或 a-f 或 A-F）的字符串。
 
 type Lexer struct {
 	chunk         string // source code
@@ -318,7 +318,7 @@ func (l *Lexer) scanShortString() string {
 	return ""
 }
 
-func (l *Lexer) escape(str string) string {
+func (l *Lexer) escape(str string) string { // escape 转义序列
 	var buf bytes.Buffer
 
 	for len(str) > 0 {
