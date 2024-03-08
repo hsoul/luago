@@ -1,0 +1,8 @@
+{
+    "editor.formatOnSave": true,
+    "go.formatTool": "default",
+    "go.gopath": "E:\\go",
+    "go.formatFlags": [
+        "-s -w"
+    ],
+}

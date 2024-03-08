@@ -10,32 +10,33 @@ import (
 // functioncall ::=  prefixexp args | prefixexp ‘:’ Name args
 
 /*
-prefixexp ::= Name
+prefixexp ::=
 
-	| ‘(’ exp ‘)’
-	| prefixexp ‘[’ exp ‘]’
-	| prefixexp ‘.’ Name
-	| prefixexp [‘:’ Name] args
+	Name |
+	prefixexp ‘[’ exp ‘]’ |
+	prefixexp ‘.’ Name |
+	prefixexp [‘:’ Name] args
+	‘(’ exp ‘)’ |
 */
 func parsePrefixExp(lexer *Lexer) Exp {
 	var exp Exp
 	if lexer.LookAhead() == TOKEN_IDENTIFIER {
 		line, name := lexer.NextIdentifier() // Name
-		exp = &NameExp{line, name}
+		exp = &NameExp{Line: line, Name: name}
 	} else { // ‘(’ exp ‘)’
 		exp = parseParensExp(lexer)
 	}
 	return _finishPrefixExp(lexer, exp)
 }
 
-func parseParensExp(lexer *Lexer) Exp {
+func parseParensExp(lexer *Lexer) Exp { // "Parens"是"Parentheses"的缩写形式，表示圆括号。
 	lexer.NextTokenOfKind(TOKEN_SEP_LPAREN) // (
 	exp := parseExp(lexer)                  // exp
 	lexer.NextTokenOfKind(TOKEN_SEP_RPAREN) // )
 
 	switch exp.(type) {
-	case *VarargExp, *FuncCallExp, *NameExp, *TableAccessExp:
-		return &ParensExp{exp}
+	case *VarargExp, *FuncCallExp, *NameExp, *TableAccessExp: // 由于圆括号会改变vararg和函数调用表达式的语义（详见第8章），所以需要保留这两种语句的圆括号。对于var表达式，也需要保留圆括号，否则前面介绍过的_checkVar（）函数就会出现问题。其余表达式两侧的圆括号则完全没必要留在AST里。
+		return &ParensExp{Exp: exp}
 	}
 
 	// no need to keep parens
@@ -49,12 +50,12 @@ func _finishPrefixExp(lexer *Lexer, exp Exp) Exp {
 			lexer.NextToken()                       // ‘[’
 			keyExp := parseExp(lexer)               // exp
 			lexer.NextTokenOfKind(TOKEN_SEP_RBRACK) // ‘]’
-			exp = &TableAccessExp{lexer.Line(), exp, keyExp}
+			exp = &TableAccessExp{LastLine: lexer.Line(), PrefixExp: exp, KeyExp: keyExp}
 		case TOKEN_SEP_DOT: // prefixexp ‘.’ Name
 			lexer.NextToken()                    // ‘.’
 			line, name := lexer.NextIdentifier() // Name
-			keyExp := &StringExp{line, name}
-			exp = &TableAccessExp{line, exp, keyExp}
+			keyExp := &StringExp{Line: line, Str: name}
+			exp = &TableAccessExp{LastLine: line, PrefixExp: exp, KeyExp: keyExp}
 		case TOKEN_SEP_COLON, // prefixexp ‘:’ Name args
 			TOKEN_SEP_LPAREN, TOKEN_SEP_LCURLY, TOKEN_STRING: // prefixexp args
 			exp = _finishFuncCallExp(lexer, exp)
@@ -71,14 +72,14 @@ func _finishFuncCallExp(lexer *Lexer, prefixExp Exp) *FuncCallExp {
 	line := lexer.Line() // todo
 	args := _parseArgs(lexer)
 	lastLine := lexer.Line()
-	return &FuncCallExp{line, lastLine, prefixExp, nameExp, args}
+	return &FuncCallExp{Line: line, LastLine: lastLine, PrefixExp: prefixExp, NameExp: nameExp, Args: args}
 }
 
 func _parseNameExp(lexer *Lexer) *StringExp {
 	if lexer.LookAhead() == TOKEN_SEP_COLON {
 		lexer.NextToken()
 		line, name := lexer.NextIdentifier()
-		return &StringExp{line, name}
+		return &StringExp{Line: line, Str: name}
 	}
 	return nil
 }
@@ -96,7 +97,7 @@ func _parseArgs(lexer *Lexer) (args []Exp) {
 		args = []Exp{parseTableConstructorExp(lexer)}
 	default: // LiteralString
 		line, str := lexer.NextTokenOfKind(TOKEN_STRING)
-		args = []Exp{&StringExp{line, str}}
+		args = []Exp{&StringExp{Line: line, Str: str}}
 	}
 	return
 }

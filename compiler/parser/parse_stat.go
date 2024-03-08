@@ -25,29 +25,29 @@ stat ::=  ‘;’
 	| varlist ‘=’ explist
 	| functioncall
 */
-func parseStat(lexer *Lexer) Stat {
+func parseStat(lexer *Lexer) Stat { // 解析语句 statement
 	switch lexer.LookAhead() {
-	case TOKEN_SEP_SEMI:
+	case TOKEN_SEP_SEMI: // ;
 		return parseEmptyStat(lexer)
-	case TOKEN_KW_BREAK:
+	case TOKEN_KW_BREAK: // break
 		return parseBreakStat(lexer)
-	case TOKEN_SEP_LABEL:
+	case TOKEN_SEP_LABEL: // :: 标签用于标识代码块的标记，通常配合 goto 一起使用
 		return parseLabelStat(lexer)
-	case TOKEN_KW_GOTO:
+	case TOKEN_KW_GOTO: // goto
 		return parseGotoStat(lexer)
-	case TOKEN_KW_DO:
+	case TOKEN_KW_DO: // do
 		return parseDoStat(lexer)
-	case TOKEN_KW_WHILE:
+	case TOKEN_KW_WHILE: // while
 		return parseWhileStat(lexer)
-	case TOKEN_KW_REPEAT:
+	case TOKEN_KW_REPEAT: // repeat
 		return parseRepeatStat(lexer)
-	case TOKEN_KW_IF:
+	case TOKEN_KW_IF: // if
 		return parseIfStat(lexer)
-	case TOKEN_KW_FOR:
+	case TOKEN_KW_FOR: // for
 		return parseForStat(lexer)
-	case TOKEN_KW_FUNCTION:
+	case TOKEN_KW_FUNCTION: // function
 		return parseFuncDefStat(lexer)
-	case TOKEN_KW_LOCAL:
+	case TOKEN_KW_LOCAL: // local
 		return parseLocalAssignOrFuncDefStat(lexer)
 	default:
 		return parseAssignOrFuncCallStat(lexer)
@@ -63,7 +63,7 @@ func parseEmptyStat(lexer *Lexer) *EmptyStat {
 // break
 func parseBreakStat(lexer *Lexer) *BreakStat {
 	lexer.NextTokenOfKind(TOKEN_KW_BREAK)
-	return &BreakStat{lexer.Line()}
+	return &BreakStat{Line: lexer.Line()}
 }
 
 // ‘::’ Name ‘::’
@@ -71,14 +71,14 @@ func parseLabelStat(lexer *Lexer) *LabelStat {
 	lexer.NextTokenOfKind(TOKEN_SEP_LABEL) // ::
 	_, name := lexer.NextIdentifier()      // name
 	lexer.NextTokenOfKind(TOKEN_SEP_LABEL) // ::
-	return &LabelStat{name}
+	return &LabelStat{Name: name}
 }
 
 // goto Name
 func parseGotoStat(lexer *Lexer) *GotoStat {
 	lexer.NextTokenOfKind(TOKEN_KW_GOTO) // goto
 	_, name := lexer.NextIdentifier()    // name
-	return &GotoStat{name}
+	return &GotoStat{Name: name}
 }
 
 // do block end
@@ -86,7 +86,7 @@ func parseDoStat(lexer *Lexer) *DoStat {
 	lexer.NextTokenOfKind(TOKEN_KW_DO)  // do
 	block := parseBlock(lexer)          // block
 	lexer.NextTokenOfKind(TOKEN_KW_END) // end
-	return &DoStat{block}
+	return &DoStat{Block: block}
 }
 
 // while exp do block end
@@ -96,7 +96,7 @@ func parseWhileStat(lexer *Lexer) *WhileStat {
 	lexer.NextTokenOfKind(TOKEN_KW_DO)    // do
 	block := parseBlock(lexer)            // block
 	lexer.NextTokenOfKind(TOKEN_KW_END)   // end
-	return &WhileStat{exp, block}
+	return &WhileStat{Exp: exp, Block: block}
 }
 
 // repeat block until exp
@@ -105,7 +105,7 @@ func parseRepeatStat(lexer *Lexer) *RepeatStat {
 	block := parseBlock(lexer)             // block
 	lexer.NextTokenOfKind(TOKEN_KW_UNTIL)  // until
 	exp := parseExp(lexer)                 // exp
-	return &RepeatStat{block, exp}
+	return &RepeatStat{Block: block, Exp: exp}
 }
 
 // if exp then block {elseif exp then block} [else block] end
@@ -127,13 +127,13 @@ func parseIfStat(lexer *Lexer) *IfStat {
 
 	// else block => elseif true then block
 	if lexer.LookAhead() == TOKEN_KW_ELSE {
-		lexer.NextToken()                           // else
-		exps = append(exps, &TrueExp{lexer.Line()}) //
-		blocks = append(blocks, parseBlock(lexer))  // block
+		lexer.NextToken()                                 // else
+		exps = append(exps, &TrueExp{Line: lexer.Line()}) //
+		blocks = append(blocks, parseBlock(lexer))        // block
 	}
 
 	lexer.NextTokenOfKind(TOKEN_KW_END) // end
-	return &IfStat{exps, blocks}
+	return &IfStat{Exps: exps, Blocks: blocks}
 }
 
 // for Name ‘=’ exp ‘,’ exp [‘,’ exp] do block end
@@ -160,15 +160,14 @@ func _finishForNumStat(lexer *Lexer, lineOfFor int, varName string) *ForNumStat 
 		lexer.NextToken()         // ,
 		stepExp = parseExp(lexer) // exp
 	} else {
-		stepExp = &IntegerExp{lexer.Line(), 1}
+		stepExp = &IntegerExp{Line: lexer.Line(), Val: 1}
 	}
 
 	lineOfDo, _ := lexer.NextTokenOfKind(TOKEN_KW_DO) // do
 	block := parseBlock(lexer)                        // block
 	lexer.NextTokenOfKind(TOKEN_KW_END)               // end
 
-	return &ForNumStat{lineOfFor, lineOfDo,
-		varName, initExp, limitExp, stepExp, block}
+	return &ForNumStat{LineOfFor: lineOfFor, LineOfDo: lineOfDo, VarName: varName, InitExp: initExp, LimitExp: limitExp, StepExp: stepExp, Block: block}
 }
 
 // for namelist in explist do block end
@@ -181,7 +180,7 @@ func _finishForInStat(lexer *Lexer, name0 string) *ForInStat {
 	lineOfDo, _ := lexer.NextTokenOfKind(TOKEN_KW_DO) // do
 	block := parseBlock(lexer)                        // block
 	lexer.NextTokenOfKind(TOKEN_KW_END)               // end
-	return &ForInStat{lineOfDo, nameList, expList, block}
+	return &ForInStat{LineOfDo: lineOfDo, NameList: nameList, ExpList: expList, Block: block}
 }
 
 // namelist ::= Name {‘,’ Name}
@@ -225,7 +224,7 @@ func _finishLocalFuncDefStat(lexer *Lexer) *LocalFuncDefStat {
 	lexer.NextTokenOfKind(TOKEN_KW_FUNCTION) // local function
 	_, name := lexer.NextIdentifier()        // name
 	fdExp := parseFuncDefExp(lexer)          // funcbody
-	return &LocalFuncDefStat{name, fdExp}
+	return &LocalFuncDefStat{Name: name, Exp: fdExp}
 }
 
 // local namelist [‘=’ explist]
@@ -238,7 +237,7 @@ func _finishLocalVarDeclStat(lexer *Lexer) *LocalVarDeclStat {
 		expList = parseExpList(lexer) // explist
 	}
 	lastLine := lexer.Line()
-	return &LocalVarDeclStat{lastLine, nameList, expList}
+	return &LocalVarDeclStat{LastLine: lastLine, NameList: nameList, ExpList: expList}
 }
 
 // varlist ‘=’ explist
@@ -258,7 +257,7 @@ func parseAssignStat(lexer *Lexer, var0 Exp) *AssignStat {
 	lexer.NextTokenOfKind(TOKEN_OP_ASSIGN) // =
 	expList := parseExpList(lexer)         // explist
 	lastLine := lexer.Line()
-	return &AssignStat{lastLine, varList, expList}
+	return &AssignStat{LastLine: lastLine, VarList: varList, ExpList: expList}
 }
 
 // varlist ::= var {‘,’ var}
@@ -291,7 +290,8 @@ func parseFuncDefStat(lexer *Lexer) *AssignStat {
 	lexer.NextTokenOfKind(TOKEN_KW_FUNCTION) // function
 	fnExp, hasColon := _parseFuncName(lexer) // funcname
 	fdExp := parseFuncDefExp(lexer)          // funcbody
-	if hasColon {                            // insert self
+
+	if hasColon { // insert self
 		fdExp.ParList = append(fdExp.ParList, "")
 		copy(fdExp.ParList[1:], fdExp.ParList)
 		fdExp.ParList[0] = "self"
@@ -307,19 +307,20 @@ func parseFuncDefStat(lexer *Lexer) *AssignStat {
 // funcname ::= Name {‘.’ Name} [‘:’ Name]
 func _parseFuncName(lexer *Lexer) (exp Exp, hasColon bool) {
 	line, name := lexer.NextIdentifier()
-	exp = &NameExp{line, name}
+	exp = &NameExp{Line: line, Name: name}
 
-	for lexer.LookAhead() == TOKEN_SEP_DOT {
+	for lexer.LookAhead() == TOKEN_SEP_DOT { // .
 		lexer.NextToken()
 		line, name := lexer.NextIdentifier()
-		idx := &StringExp{line, name}
-		exp = &TableAccessExp{line, exp, idx}
+		keyExp := &StringExp{Line: line, Str: name}
+		exp = &TableAccessExp{LastLine: line, PrefixExp: exp, KeyExp: keyExp}
 	}
-	if lexer.LookAhead() == TOKEN_SEP_COLON {
+
+	if lexer.LookAhead() == TOKEN_SEP_COLON { // :
 		lexer.NextToken()
 		line, name := lexer.NextIdentifier()
-		idx := &StringExp{line, name}
-		exp = &TableAccessExp{line, exp, idx}
+		keyExp := &StringExp{Line: line, Str: name}
+		exp = &TableAccessExp{LastLine: line, PrefixExp: exp, KeyExp: keyExp}
 		hasColon = true
 	}
 

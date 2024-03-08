@@ -36,20 +36,20 @@ type operator struct {
 }
 
 var operators = []operator{
-	operator{"__add", iadd, fadd},    // LUA_OPADD
-	operator{"__sub", isub, fsub},    // LUA_OPSUB
-	operator{"__mul", imul, fmul},    // LUA_OPMUL
-	operator{"__mod", imod, fmod},    // LUA_OPMOD
-	operator{"__pow", nil, pow},      // LUA_OPPOW
-	operator{"__div", nil, div},      // LUA_OPDIV
-	operator{"__idiv", iidiv, fidiv}, // LUA_OPIDIV
-	operator{"__band", band, nil},    // LUA_OPBAND
-	operator{"__bor", bor, nil},      // LUA_OPBOR
-	operator{"__bxor", bxor, nil},    // LUA_OPBXOR
-	operator{"__shl", shl, nil},      // LUA_OPSHL
-	operator{"__shr", shr, nil},      // LUA_OPSHR
-	operator{"__umn", iunm, funm},    // LUA_OPUNM
-	operator{"__bnot", bnot, nil},    // LUA_OPBNOT
+	{"__add", iadd, fadd},    // LUA_OPADD
+	{"__sub", isub, fsub},    // LUA_OPSUB
+	{"__mul", imul, fmul},    // LUA_OPMUL
+	{"__mod", imod, fmod},    // LUA_OPMOD
+	{"__pow", nil, pow},      // LUA_OPPOW
+	{"__div", nil, div},      // LUA_OPDIV
+	{"__idiv", iidiv, fidiv}, // LUA_OPIDIV
+	{"__band", band, nil},    // LUA_OPBAND
+	{"__bor", bor, nil},      // LUA_OPBOR
+	{"__bxor", bxor, nil},    // LUA_OPBXOR
+	{"__shl", shl, nil},      // LUA_OPSHL
+	{"__shr", shr, nil},      // LUA_OPSHR
+	{"__umn", iunm, funm},    // LUA_OPUNM
+	{"__bnot", bnot, nil},    // LUA_OPBNOT
 }
 
 func (s *luaState) Arith(op ArithOp) {
