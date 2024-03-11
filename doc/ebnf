@@ -28,10 +28,6 @@ varlist ::= var {',' var}
 
 var ::=  Name | prefixexp '[' exp ']' | prefixexp '.' Name
 
-namelist ::= Name {',' Name}
-
-explist ::= exp {',' exp}
-
 exp ::= nil | 
         false | 
         true | 
@@ -45,6 +41,10 @@ exp ::= nil |
         unop exp
 
 prefixexp ::= var | functioncall | '(' exp ')'
+
+namelist ::= Name {',' Name}
+
+explist ::= exp {',' exp}
 
 functioncall ::=  prefixexp args | prefixexp ':' Name args
 
