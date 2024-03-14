@@ -50,9 +50,9 @@ type ForNumStat struct {
 	LineOfFor int
 	LineOfDo  int
 	VarName   string
-	InitExp   Exp
-	LimitExp  Exp
-	StepExp   Exp
+	InitExp   Exp // 初始值
+	LimitExp  Exp // 限制
+	StepExp   Exp // 步长
 	Block     *Block
 }
 

@@ -39,15 +39,15 @@ type locVarInfo struct {
 }
 
 type funcInfo struct {
-	parent    *funcInfo
-	subFuncs  []*funcInfo
-	usedRegs  int
-	maxRegs   int
-	scopeLv   int
-	locVars   []*locVarInfo
-	locNames  map[string]*locVarInfo
+	parent    *funcInfo              // 父函数信息
+	subFuncs  []*funcInfo            // 子函数信息
+	usedRegs  int                    // 已经分配的寄存器数量
+	maxRegs   int                    // 需要的最大寄存器数量
+	scopeLv   int                    // scopeLv字段记录当前作用域层次； 作用域层次从0开始，每进入一个作用域就加1
+	locVars   []*locVarInfo          // 按顺序记录函数内部声明的全部局部变量
+	locNames  map[string]*locVarInfo // 记录当前生效的局部变量
 	upvalues  map[string]upvalInfo
-	constants map[interface{}]int
+	constants map[interface{}]int // 常量表
 	breaks    [][]int
 	insts     []uint32
 	lineNums  []uint32
@@ -209,13 +209,13 @@ func (f *funcInfo) indexOfUpval(name string) int {
 		return upval.index
 	}
 	if f.parent != nil {
-		if locVar, found := f.parent.locNames[name]; found {
+		if locVar, found := f.parent.locNames[name]; found { // 先查找局部变量
 			idx := len(f.upvalues)
 			f.upvalues[name] = upvalInfo{locVar.slot, -1, idx}
 			locVar.captured = true
 			return idx
 		}
-		if uvIdx := f.parent.indexOfUpval(name); uvIdx >= 0 {
+		if uvIdx := f.parent.indexOfUpval(name); uvIdx >= 0 { // 再查找upvalue
 			idx := len(f.upvalues)
 			f.upvalues[name] = upvalInfo{-1, uvIdx, idx}
 			return idx

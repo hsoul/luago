@@ -267,9 +267,9 @@ func cgAssignStat(fi *funcInfo, node *AssignStat) {
 	nExps := len(exps)
 	nVars := len(node.VarList)
 
-	tRegs := make([]int, nVars)
-	kRegs := make([]int, nVars)
-	vRegs := make([]int, nVars)
+	tRegs := make([]int, nVars) // table register
+	kRegs := make([]int, nVars) // key register
+	vRegs := make([]int, nVars) // value register
 	oldRegs := fi.usedRegs
 
 	for i, exp := range node.VarList {

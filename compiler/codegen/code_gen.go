@@ -15,5 +15,5 @@ func GenProto(chunk *Block) *Prototype {
 	fi := newFuncInfo(nil, fd)
 	fi.addLocVar("_ENV", 0)
 	cgFuncDefExp(fi, fd, 0)
-	return toProto(fi.subFuncs[0])
+	return toProto(fi.subFuncs[0]) // 为什么使用 fi.subFuncs[0] 返回 main func 呢？
 }

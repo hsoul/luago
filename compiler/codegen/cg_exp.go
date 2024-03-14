@@ -192,8 +192,8 @@ func cgNameExp(fi *funcInfo, node *NameExp, a int) {
 	} else { // x => _ENV['x']
 		taExp := &TableAccessExp{
 			LastLine:  node.Line,
-			PrefixExp: &NameExp{node.Line, "_ENV"},
-			KeyExp:    &StringExp{node.Line, node.Name},
+			PrefixExp: &NameExp{Line: node.Line, Name: "_ENV"},
+			KeyExp:    &StringExp{Line: node.Line, Str: node.Name},
 		}
 		cgTableAccessExp(fi, taExp, a)
 	}

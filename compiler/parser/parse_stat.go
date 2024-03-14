@@ -109,6 +109,8 @@ func parseRepeatStat(lexer *Lexer) *RepeatStat {
 }
 
 // if exp then block {elseif exp then block} [else block] end
+// if exp then block {elseif exp then block} [elseif true then block] end
+// if exp then block {elseif exp then block} end
 func parseIfStat(lexer *Lexer) *IfStat {
 	exps := make([]Exp, 0, 4)
 	blocks := make([]*Block, 0, 4)

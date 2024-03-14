@@ -5,4 +5,8 @@
     "go.formatFlags": [
         "-s -w"
     ],
+    "go.useLanguageServer": true,
+    "gopls": {
+        "formatting.gofumpt": true,
+    },
 }

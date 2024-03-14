@@ -1,7 +1,5 @@
-local t = {
-    a = {
-        b = {
-            c = 1
-        }
-    }
-}
+function test(a)
+    print(a)
+end
+
+test(2)
